@@ -18,11 +18,11 @@ matplotlib.style.use('ggplot')
 
 
 def calculate_sun_angles():
-    Zurich = Location(epwfile_path=os.path.join(
+    Zurich = Location(path=os.path.join(
         mainPath, 'auxiliary', 'Zurich-Kloten_2013.epw'))
 
 
-    Zurich.calc_sun_position(latitude_deg=47.480, longitude_deg=8.536, year=2015, hoy=3708)
+    Zurich.calc_sun_position(year=2015, hoy=3708)
 
 
     Azimuth = []
@@ -30,8 +30,7 @@ def calculate_sun_angles():
     Sunnyhoy = []
 
     for hoy in range(8760):
-        sun = Zurich.calc_sun_position(
-            latitude_deg=47.480, longitude_deg=8.536, year=2015, hoy=hoy)
+        sun = Zurich.calc_sun_position(year=2015, hoy=hoy)
         Altitude.append(sun[0])
         Azimuth.append(sun[1])
         Sunnyhoy.append(hoy + 1)

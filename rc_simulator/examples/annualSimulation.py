@@ -43,7 +43,7 @@ COP = []
 
 
 # Initialise the Location with a weather file
-Zurich = Location(epwfile_path=os.path.join(
+Zurich = Location(path=os.path.join(
     mainPath, 'auxiliary', 'Zurich-Kloten_2013.epw'))
 
 # Initialise an instance of the building. Empty spaces take on the default
@@ -102,8 +102,7 @@ for hour in range(8760):
     # Extract the outdoor temperature in Zurich for that hour
     t_out = Zurich.weather_data['drybulb_C'][hour]
 
-    Altitude, Azimuth = Zurich.calc_sun_position(
-        latitude_deg=47.480, longitude_deg=8.536, year=2015, hoy=hour)
+    Altitude, Azimuth = Zurich.calc_sun_position(year=2015, hoy=hour)
 
     SouthWindow.calc_solar_gains(sun_altitude=Altitude, sun_azimuth=Azimuth,
                                  normal_direct_radiation=Zurich.weather_data[

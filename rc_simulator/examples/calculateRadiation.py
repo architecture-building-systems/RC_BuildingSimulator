@@ -30,7 +30,7 @@ from radiation import Window
 
 
 # Initialise the Location with a weather file
-Zurich = Location(epwfile_path=os.path.join(
+Zurich = Location(path=os.path.join(
     mainPath, 'auxiliary', 'Zurich-Kloten_2013.epw'))
 
 # Set the hour of the year for determination of the solar angles
@@ -38,8 +38,7 @@ Zurich = Location(epwfile_path=os.path.join(
 hoy = 3993
 
 # Determine the solar azimuth and altitude angle
-Altitude, Azimuth = Zurich.calc_sun_position(
-    latitude_deg=47.480, longitude_deg=8.536, year=2015, hoy=hoy)
+Altitude, Azimuth = Zurich.calc_sun_position(year=2015, hoy=hoy)
 
 # Define Windows
 SouthWindow = Window(azimuth_tilt=0, alititude_tilt=90, glass_solar_transmittance=0.7,

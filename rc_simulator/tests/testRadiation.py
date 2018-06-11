@@ -18,7 +18,7 @@ class TestRadiation(unittest.TestCase):
 
     def test_sunPosition(self):
 
-        Zurich = Location(epwfile_path=os.path.join(
+        Zurich = Location(path=os.path.join(
             mainPath, 'auxiliary', 'Zurich-Kloten_2013.epw'))
 
         Azimuth = []
@@ -26,8 +26,7 @@ class TestRadiation(unittest.TestCase):
         Sunnyhoy = []
 
         for hoy in range(8760):
-            angles = Zurich.calc_sun_position(
-                latitude_deg=47.480, longitude_deg=8.536, year=2015, hoy=hoy)
+            angles = Zurich.calc_sun_position(year=2015, hoy=hoy)
 
             Altitude.append(angles[0])
             Azimuth.append(angles[1])
@@ -65,10 +64,9 @@ class TestRadiation(unittest.TestCase):
         hoy = 3993
         # 9:00 am 16 June 2015
 
-        Zurich = Location(epwfile_path=os.path.join(
+        Zurich = Location(path=os.path.join(
             mainPath, 'auxiliary', 'Zurich-Kloten_2013.epw'))
-        Altitude, Azimuth = Zurich.calc_sun_position(
-            latitude_deg=47.480, longitude_deg=8.536, year=2015, hoy=hoy)
+        Altitude, Azimuth = Zurich.calc_sun_position(year=2015, hoy=hoy)
 
         SouthWindow = Window(azimuth_tilt=0, alititude_tilt=90, glass_solar_transmittance=0.7,
                              glass_light_transmittance=0.8, area=1)

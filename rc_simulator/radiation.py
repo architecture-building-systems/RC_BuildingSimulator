@@ -28,28 +28,66 @@ __status__ = "BETA"
 class Location(object):
     """Set the Location of the Simulation with an Energy Plus Weather File"""
 
-    def __init__(self, epwfile_path):
+    # the location and name should be parsible from the EPW file
+    latitude_deg = None
+    longitude_deg = None
+    name = None
 
-        # Set EPW Labels and import epw file
-        epw_labels = ['year', 'month', 'day', 'hour', 'minute', 'datasource', 'drybulb_C', 'dewpoint_C', 'relhum_percent',
-                      'atmos_Pa', 'exthorrad_Whm2', 'extdirrad_Whm2', 'horirsky_Whm2', 'glohorrad_Whm2',
-                      'dirnorrad_Whm2', 'difhorrad_Whm2', 'glohorillum_lux', 'dirnorillum_lux', 'difhorillum_lux',
-                      'zenlum_lux', 'winddir_deg', 'windspd_ms', 'totskycvr_tenths', 'opaqskycvr_tenths', 'visibility_km',
-                      'ceiling_hgt_m', 'presweathobs', 'presweathcodes', 'precip_wtr_mm', 'aerosol_opt_thousandths',
-                      'snowdepth_cm', 'days_last_snow', 'Albedo', 'liq_precip_depth_mm', 'liq_precip_rate_Hour']
+    def __init__(self, path, dtype='epw'):
 
-        # Import EPW file
-        self.weather_data = pd.read_csv(
-            epwfile_path, skiprows=8, header=None, names=epw_labels).drop('datasource', axis=1)
+        if dtype == 'epw':  # ewp weather data file
 
-    def calc_sun_position(self, latitude_deg, longitude_deg, year, hoy):
+            # Set EPW Labels and import epw file
+            epw_labels = ['year', 'month', 'day', 'hour', 'minute', 'datasource', 'drybulb_C', 'dewpoint_C',
+                          'relhum_percent', 'atmos_Pa', 'exthorrad_Whm2', 'extdirrad_Whm2', 'horirsky_Whm2',
+                          'glohorrad_Whm2', 'dirnorrad_Whm2', 'difhorrad_Whm2', 'glohorillum_lux',
+                          'dirnorillum_lux', 'difhorillum_lux', 'zenlum_lux', 'winddir_deg', 'windspd_ms',
+                          'totskycvr_tenths', 'opaqskycvr_tenths', 'visibility_km', 'ceiling_hgt_m',
+                          'presweathobs', 'presweathcodes', 'precip_wtr_mm', 'aerosol_opt_thousandths',
+                          'snowdepth_cm', 'days_last_snow', 'Albedo', 'liq_precip_depth_mm',
+                          'liq_precip_rate_Hour']
+
+            # Import EPW file
+            self.weather_data = pd.read_csv(path, skiprows=8, header=None, names=epw_labels).drop('datasource', axis=1)
+
+            # extract the lat/lon from the EPW header
+            fin = open(path,'r')
+            for line in fin:
+                if 'LOCATION' in line:
+                    args = line.split(',')
+
+                    try:
+                        self.name = args[1]
+                        self.latitude_deg = float(args[6])
+                        self.longitude_deg = float(args[7])
+                    except:
+                        pass
+                    break
+
+            if self.latitude_deg==None or self.longitude_deg==None:
+                # trap problem with 
+                print("ERROR: EPW weather file contains incomplete",
+                      "location information. Please see",
+                      "https://energyplus.net/sites/default/files/pdfs_v8.3.0/AuxiliaryPrograms.pdf",
+                      "for more information.")
+                exit(0)
+
+        elif dtype == 'ncep': # NCEP reanalysis data
+            # need: 'drybulb_C', 'dirnorrad_Whm2', 'difhorrad_Whm2', 'dirnorillum_lux', 'difhorillum_lux'
+            print("NCEP data importer not implemented yet.  Aborting")
+            exit(0)
+        elif dtype == None:
+            # provide a simple pass through for thos accasions when
+            # you need to manually load different datasets.
+            pass
+        else:
+            print("ERROR: input datatype not know.  Aborting...")
+            exit(0)
+
+    def calc_sun_position(self, year, hoy):
         """
         Calculates the Sun Position for a specific hour and location
 
-        :param latitude_deg: Geographical Latitude in Degrees
-        :type latitude_deg: float
-        :param longitude_deg: Geographical Longitude in Degrees
-        :type longitude_deg: float
         :param year: year
         :type year: int
         :param hoy: Hour of the year from the start. The first hour of January is 1
@@ -59,8 +97,8 @@ class Location(object):
         """
 
         # Convert to Radians
-        latitude_rad = math.radians(latitude_deg)
-        longitude_rad = math.radians(longitude_deg)
+        latitude_rad = math.radians(self.latitude_deg)
+        longitude_rad = math.radians(self.longitude_deg)
 
         # Set the date in UTC based off the hour of year and the year itself
         start_of_year = datetime.datetime(year, 1, 1, 0, 0, 0, 0)
@@ -85,7 +123,7 @@ class Location(object):
 
         # True Solar Time
         solar_time = ((utc_datetime.hour * 60) + utc_datetime.minute +
-                      (4 * longitude_deg) + equation_of_time) / 60.0
+                      (4 * self.longitude_deg) + equation_of_time) / 60.0
 
         # Angle between the local longitude and longitude where the sun is at
         # higher altitude
