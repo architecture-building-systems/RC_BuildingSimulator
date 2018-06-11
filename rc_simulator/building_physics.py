@@ -257,6 +257,9 @@ class Building(object):
             # --> rc_model_function_1(...)
             self.energy_demand = 0
 
+            from numpy import nan
+            self.cop = nan
+
             # y u no pep8 bra?
             self.heating_demand = 0  # Energy required by the zone
             self.cooling_demand = 0  # Energy surplus of the zone
