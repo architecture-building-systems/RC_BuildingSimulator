@@ -184,7 +184,8 @@ class Window(object):
         if math.cos(sun_azimuth_rad - self.azimuth_tilt_rad) > 0:
             # Proportion of the radiation incident on the window (cos of the
             # incident ray)
-            direct_factor = math.cos(sun_altitude_rad) * math.cos(sun_azimuth_rad - self.azimuth_tilt_rad) + \
+            direct_factor = math.cos(sun_altitude_rad) * math.sin(self.alititude_tilt_rad) * \
+                math.cos(sun_azimuth_rad - self.azimuth_tilt_rad) + \
                 math.sin(sun_altitude_rad) * math.cos(self.alititude_tilt_rad)
 
         else:

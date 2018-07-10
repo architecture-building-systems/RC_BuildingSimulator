@@ -97,13 +97,13 @@ class TestRadiation(unittest.TestCase):
         self.assertEqual(round(EastWindow.incident_solar, 2), 570.06)
         self.assertEqual(round(WestWindow.incident_solar, 2), 58.0)
         self.assertEqual(round(NorthWindow.incident_solar, 2), 58.0)
-        self.assertEqual(round(RoofAtrium.incident_solar, 2), 1113.72)
+        self.assertEqual(round(RoofAtrium.incident_solar, 2), 855.87)
 
         self.assertEqual(round(SouthWindow.solar_gains, 2), 221.1)
         self.assertEqual(round(EastWindow.solar_gains, 2), 399.04)
         self.assertEqual(round(WestWindow.solar_gains, 2), 40.6)
         self.assertEqual(round(NorthWindow.solar_gains, 2), 40.6)
-        self.assertEqual(round(RoofAtrium.solar_gains, 2), 779.61)
+        self.assertEqual(round(RoofAtrium.solar_gains, 2), 599.11)
 
         self.assertEqual(
             round(SouthWindow.transmitted_illuminance, 2), 27330.46)
@@ -112,7 +112,7 @@ class TestRadiation(unittest.TestCase):
         self.assertEqual(round(WestWindow.transmitted_illuminance, 2), 6375.2)
         self.assertEqual(round(NorthWindow.transmitted_illuminance, 2), 6375.2)
         self.assertEqual(
-            round(RoofAtrium.transmitted_illuminance, 2), 93833.62)
+            round(RoofAtrium.transmitted_illuminance, 2), 72878.36)
 
 
 if __name__ == '__main__':
