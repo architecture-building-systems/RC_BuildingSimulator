@@ -150,8 +150,11 @@ class Zone(object):
         # Determine the ventilation conductance
         ach_tot = ach_infl + ach_vent  # Total Air Changes Per Hour
         # temperature adjustment factor taking ventilation and infiltration
-        # [ISO: E -27]
-        b_ek = (1 - (ach_vent / (ach_tot)) * ventilation_efficiency)
+        # [ISO: E -27]; it does not matter when there is no air change at all
+        if ach_tot > 0:
+            b_ek = (1 - (ach_vent / (ach_tot)) * ventilation_efficiency)
+        else:
+            b_ek = 1.0
         self.h_ve_adj = 1200 * b_ek * self.room_vol * \
             (ach_tot / 3600)  # Conductance through ventilation [W/M]
         # transmittance from the internal air to the thermal mass of the
@@ -182,9 +185,9 @@ class Zone(object):
     def h_tr_1(self):
         """
         Definition to simplify calc_phi_m_tot
-        # (C.6) in [C.3 ISO 13790]
+        # (C.6) in [C.3 ISO 13790], written to stay finite when h_ve_adj is 0
         """
-        return 1.0 / (1.0 / self.h_ve_adj + 1.0 / self.h_tr_is)
+        return self.h_ve_adj * self.h_tr_is / (self.h_ve_adj + self.h_tr_is)
 
     @property
     def h_tr_2(self):
@@ -552,9 +555,11 @@ class Zone(object):
 
         t_supply = t_out  # ASSUMPTION: Supply air comes straight from the outside air
 
+        # h_tr_1 * (phi_ia / h_ve_adj + t_supply), rearranged to stay finite when h_ve_adj is 0
+        h_tr_1_flow = self.h_tr_is * (self.h_ve_adj * t_supply + self.phi_ia) / (self.h_tr_is + self.h_ve_adj)
+
         self.phi_m_tot = self.phi_m + self.h_tr_em * t_out + \
-            self.h_tr_3 * (self.phi_st + self.h_tr_w * t_out + self.h_tr_1 *
-                           ((self.phi_ia / self.h_ve_adj) + t_supply)) / self.h_tr_2
+            self.h_tr_3 * (self.phi_st + self.h_tr_w * t_out + h_tr_1_flow) / self.h_tr_2
 
     def calc_t_m(self, t_m_prev):
         """
@@ -572,8 +577,10 @@ class Zone(object):
 
         t_supply = t_out  # ASSUMPTION: Supply air comes straight from the outside air
 
-        self.t_s = (self.h_tr_ms * self.t_m + self.phi_st + self.h_tr_w * t_out + self.h_tr_1 *
-                    (t_supply + self.phi_ia / self.h_ve_adj)) / \
+        # h_tr_1 * (t_supply + phi_ia / h_ve_adj), rearranged to stay finite when h_ve_adj is 0
+        h_tr_1_flow = self.h_tr_is * (self.h_ve_adj * t_supply + self.phi_ia) / (self.h_tr_is + self.h_ve_adj)
+
+        self.t_s = (self.h_tr_ms * self.t_m + self.phi_st + self.h_tr_w * t_out + h_tr_1_flow) / \
                    (self.h_tr_ms + self.h_tr_w + self.h_tr_1)
 
     def calc_t_air(self, t_out):
